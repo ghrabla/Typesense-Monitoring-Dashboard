@@ -1,0 +1,35 @@
+name : typesense-monitoring-dashboard
+
+services:
+  typesense:
+    image: typesense/typesense:0.25.2
+    container_name: typesense
+    ports:
+      - "8108:8108"
+    volumes:
+      - ./typesense-data:/data
+    environment:
+      - TYPESENSE_DATA_DIR=/data
+      - TYPESENSE_API_KEY=${TYPESENSE_API_KEY}
+      - TYPESENSE_ENABLE_CORS=${TYPESENSE_ENABLE_CORS}
+    restart: unless-stopped
+
+  server:
+    build: ./server
+    container_name: go-server
+    ports:
+      - "8080:8080"
+    depends_on:
+      - typesense
+    environment:
+      TYPESENSE_HOST: ${TYPESENSE_HOST}
+      TYPESENSE_PORT: 8108
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY}
+
+  client:
+    build: ./client
+    container_name: react-client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server

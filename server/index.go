@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -27,6 +26,8 @@ func main() {
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
+
+		*
 		fmt.Fprintln(w, "OK")
 	})
 
@@ -36,6 +37,6 @@ func main() {
 	}
 	log.Printf("Server starting on port %s...\n", port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
-		log.Fatal(err)
+		log.Fatal(err)""
 	}
 }

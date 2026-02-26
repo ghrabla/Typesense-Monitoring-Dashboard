@@ -1,0 +1,14 @@
+{
+  "name": "orders",
+  "fields": [
+    { "name": "id", "type": "string" },
+    { "name": "user_id", "type": "string", "facet": true },
+    { "name": "product_id", "type": "string", "facet": true },
+    { "name": "quantity", "type": "int32" },
+    { "name": "total_price", "type": "float" },
+    { "name": "status", "type": "string", "facet": true },
+    { "name": "payment_method", "type": "string", "facet": true },
+    { "name": "order_date", "type": "int64" }
+  ],
+  "default_sorting_field": "order_date"
+}

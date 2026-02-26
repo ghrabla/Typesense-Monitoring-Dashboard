@@ -1,0 +1,14 @@
+{
+  "name": "users",
+  "fields": [
+    { "name": "id", "type": "string" },
+    { "name": "first_name", "type": "string" },
+    { "name": "last_name", "type": "string" },
+    { "name": "email", "type": "string" },
+    { "name": "age", "type": "int32", "facet": true },
+    { "name": "country", "type": "string", "facet": true },
+    { "name": "is_active", "type": "bool", "facet": true },
+    { "name": "signup_date", "type": "int64" }
+  ],
+  "default_sorting_field": "signup_date"
+}

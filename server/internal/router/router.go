@@ -19,7 +19,9 @@ func New(
 	mux.HandleFunc("GET /api/metrics", healthHandler.Metrics)
 
 	mux.HandleFunc("GET /api/collections", collectionHandler.ListCollections)
+	mux.HandleFunc("POST /api/collections", collectionHandler.CreateCollection)
 	mux.HandleFunc("GET /api/collections/{name}", collectionHandler.GetCollection)
+	mux.HandleFunc("DELETE /api/collections/{name}", collectionHandler.DeleteCollection)
 
 	var h http.Handler = mux
 	h = middleware.Logger(h)

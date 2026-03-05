@@ -5,6 +5,7 @@ import (
 
 	"github.com/ghrabla/Typesense-Monitoring-Dashboard/internal/model"
 	ts "github.com/ghrabla/Typesense-Monitoring-Dashboard/internal/typesense"
+	"github.com/typesense/typesense-go/v2/typesense/api"
 )
 
 type CollectionService struct {
@@ -70,4 +71,47 @@ func (s *CollectionService) GetCollection(ctx context.Context, name string) (*mo
 	}
 
 	return collection, nil
+}
+
+func (s *CollectionService) CreateCollection(ctx context.Context, req *model.CreateCollectionRequest) (*model.Collection, error) {
+	fields := make([]api.Field, 0, len(req.Fields))
+	for _, f := range req.Fields {
+		field := api.Field{
+			Name: f.Name,
+			Type: f.Type,
+		}
+		if f.Facet {
+			facet := f.Facet
+			field.Facet = &facet
+		}
+		if f.Optional {
+			optional := f.Optional
+			field.Optional = &optional
+		}
+		if f.Index {
+			index := f.Index
+			field.Index = &index
+		}
+		fields = append(fields, field)
+	}
+
+	schema := &api.CollectionSchema{
+		Name:   req.Name,
+		Fields: fields,
+	}
+	if req.DefaultSortingField != "" {
+		schema.DefaultSortingField = &req.DefaultSortingField
+	}
+
+	_, err := s.client.Collections().Create(ctx, schema)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.GetCollection(ctx, req.Name)
+}
+
+func (s *CollectionService) DeleteCollection(ctx context.Context, name string) error {
+	_, err := s.client.Collection(name).Delete(ctx)
+	return err
 }

@@ -21,3 +21,10 @@ type CollectionSummary struct {
 	NumDocuments int64  `json:"num_documents"`
 	NumFields    int    `json:"num_fields"`
 }
+
+// CreateCollectionRequest represents the request payload for creating a collection
+type CreateCollectionRequest struct {
+	Name                string            `json:"name"`
+	Fields              []CollectionField `json:"fields"`
+	DefaultSortingField string            `json:"default_sorting_field,omitempty"`
+}

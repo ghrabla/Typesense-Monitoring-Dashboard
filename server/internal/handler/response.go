@@ -2,7 +2,10 @@ package handler
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
+
+	"github.com/ghrabla/Typesense-Monitoring-Dashboard/internal/middleware"
 )
 
 func writeJSON(w http.ResponseWriter, status int, data interface{}) {
@@ -15,4 +18,14 @@ func writeJSON(w http.ResponseWriter, status int, data interface{}) {
 
 func writeError(w http.ResponseWriter, status int, message string) {
 	writeJSON(w, status, map[string]string{"error": message})
+}
+
+// writeServerError logs the underlying error server-side (with request ID) and
+// returns a generic message to the client.
+func writeServerError(w http.ResponseWriter, r *http.Request, status int, message string, err error) {
+	slog.ErrorContext(r.Context(), message,
+		"error", err,
+		"request_id", middleware.RequestIDFromContext(r.Context()),
+	)
+	writeError(w, status, message+": "+err.Error())
 }

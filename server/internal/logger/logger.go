@@ -1,4 +1,3 @@
-package logger
 // Package logger configures the application-wide structured logger (log/slog).
 package logger
 

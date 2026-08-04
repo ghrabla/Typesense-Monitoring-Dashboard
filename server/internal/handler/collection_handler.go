@@ -19,7 +19,7 @@ func NewCollectionHandler(svc *service.CollectionService) *CollectionHandler {
 func (h *CollectionHandler) ListCollections(w http.ResponseWriter, r *http.Request) {
 	collections, err := h.svc.ListCollections(r.Context())
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to retrieve collections: "+err.Error())
+		writeServerError(w, r, http.StatusInternalServerError, "failed to retrieve collections", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, collections)
@@ -34,7 +34,7 @@ func (h *CollectionHandler) GetCollection(w http.ResponseWriter, r *http.Request
 
 	collection, err := h.svc.GetCollection(r.Context(), name)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to retrieve collection: "+err.Error())
+		writeServerError(w, r, http.StatusInternalServerError, "failed to retrieve collection", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, collection)
@@ -59,7 +59,7 @@ func (h *CollectionHandler) CreateCollection(w http.ResponseWriter, r *http.Requ
 
 	collection, err := h.svc.CreateCollection(r.Context(), &req)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to create collection: "+err.Error())
+		writeServerError(w, r, http.StatusInternalServerError, "failed to create collection", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, collection)
@@ -73,7 +73,7 @@ func (h *CollectionHandler) DeleteCollection(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := h.svc.DeleteCollection(r.Context(), name); err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to delete collection: "+err.Error())
+		writeServerError(w, r, http.StatusInternalServerError, "failed to delete collection", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{

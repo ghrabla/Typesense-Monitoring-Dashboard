@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"log/slog"
 	"net/http"
 
+	"github.com/ghrabla/Typesense-Monitoring-Dashboard/internal/middleware"
 	"github.com/ghrabla/Typesense-Monitoring-Dashboard/internal/service"
 )
 
@@ -17,6 +19,10 @@ func NewHealthHandler(svc *service.HealthService) *HealthHandler {
 func (h *HealthHandler) Health(w http.ResponseWriter, r *http.Request) {
 	resp, err := h.svc.CheckHealth(r.Context())
 	if err != nil {
+		slog.WarnContext(r.Context(), "health check failed",
+			"error", err,
+			"request_id", middleware.RequestIDFromContext(r.Context()),
+		)
 		writeJSON(w, http.StatusServiceUnavailable, resp)
 		return
 	}
@@ -26,7 +32,7 @@ func (h *HealthHandler) Health(w http.ResponseWriter, r *http.Request) {
 func (h *HealthHandler) Stats(w http.ResponseWriter, r *http.Request) {
 	stats, err := h.svc.GetStats(r.Context())
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to retrieve stats: "+err.Error())
+		writeServerError(w, r, http.StatusInternalServerError, "failed to retrieve stats", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, stats)
@@ -35,7 +41,7 @@ func (h *HealthHandler) Stats(w http.ResponseWriter, r *http.Request) {
 func (h *HealthHandler) Metrics(w http.ResponseWriter, r *http.Request) {
 	metrics, err := h.svc.GetMetrics(r.Context())
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to retrieve metrics: "+err.Error())
+		writeServerError(w, r, http.StatusInternalServerError, "failed to retrieve metrics", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, metrics)

@@ -6,20 +6,24 @@ import (
 )
 
 type Config struct {
-	Port           string
-	TypesenseHost  string
-	TypesensePort  string
+	Port            string
+	TypesenseHost   string
+	TypesensePort   string
 	TypesenseAPIKey string
-	ClientOrigin   string
+	ClientOrigin    string
+	LogLevel        string
+	LogFormat       string
 }
 
 func Load() (*Config, error) {
 	cfg := &Config{
-		Port:           getEnv("PORT", "8080"),
-		TypesenseHost:  getEnv("TYPESENSE_HOST", "typesense"),
-		TypesensePort:  getEnv("TYPESENSE_PORT", "8108"),
+		Port:            getEnv("PORT", "8080"),
+		TypesenseHost:   getEnv("TYPESENSE_HOST", "typesense"),
+		TypesensePort:   getEnv("TYPESENSE_PORT", "8108"),
 		TypesenseAPIKey: os.Getenv("TYPESENSE_API_KEY"),
-		ClientOrigin:   getEnv("CLIENT_ORIGIN", "http://localhost:5173"),
+		ClientOrigin:    getEnv("CLIENT_ORIGIN", "http://localhost:5173"),
+		LogLevel:        getEnv("LOG_LEVEL", "info"),
+		LogFormat:       getEnv("LOG_FORMAT", "json"),
 	}
 
 	if cfg.TypesenseAPIKey == "" {

@@ -1,25 +1,53 @@
 package middleware
 
 import (
-	"log"
+	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"log/slog"
 	"net/http"
 	"time"
 )
 
+type contextKey string
+
+const requestIDKey contextKey = "requestID"
+
+// Logger logs every request (method, path, status, duration, request ID) via slog.
 func Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
+		requestID := newRequestID()
+		r = r.WithContext(context.WithValue(r.Context(), requestIDKey, requestID))
+		w.Header().Set("X-Request-ID", requestID)
+
 		wrapped := &statusWriter{ResponseWriter: w, statusCode: http.StatusOK}
 		next.ServeHTTP(wrapped, r)
 
-		log.Printf("%s %s %d %s",
-			r.Method,
-			r.URL.Path,
-			wrapped.statusCode,
-			time.Since(start),
+		slog.InfoContext(r.Context(), "http request",
+			"request_id", requestID,
+			"method", r.Method,
+			"path", r.URL.Path,
+			"status", wrapped.statusCode,
+			"duration_ms", time.Since(start).Milliseconds(),
+			"remote_addr", r.RemoteAddr,
 		)
 	})
+}
+
+// RequestIDFromContext returns the request ID stored by Logger, or "" if absent.
+func RequestIDFromContext(ctx context.Context) string {
+	id, _ := ctx.Value(requestIDKey).(string)
+	return id
+}
+
+func newRequestID() string {
+	b := make([]byte, 8)
+	if _, err := rand.Read(b); err != nil {
+		return "unknown"
+	}
+	return hex.EncodeToString(b)
 }
 
 type statusWriter struct {

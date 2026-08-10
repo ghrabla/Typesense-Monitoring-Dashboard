@@ -13,7 +13,6 @@ type contextKey string
 
 const requestIDKey contextKey = "requestID"
 
-// Logger logs every request (method, path, status, duration, request ID) via slog.
 func Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -36,7 +35,6 @@ func Logger(next http.Handler) http.Handler {
 	})
 }
 
-// RequestIDFromContext returns the request ID stored by Logger, or "" if absent.
 func RequestIDFromContext(ctx context.Context) string {
 	id, _ := ctx.Value(requestIDKey).(string)
 	return id

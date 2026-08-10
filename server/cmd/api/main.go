@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-	// bootstrap logger so config load errors are captured before final config is known.
 	logger.Init(os.Getenv("LOG_LEVEL"), os.Getenv("LOG_FORMAT"))
 
 	cfg, err := config.Load()

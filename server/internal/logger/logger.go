@@ -1,4 +1,3 @@
-// Package logger configures the application-wide structured logger (log/slog).
 package logger
 
 import (
@@ -7,8 +6,6 @@ import (
 	"strings"
 )
 
-// Init builds a slog.Logger from the given level ("debug", "info", "warn", "error")
-// and format ("json" or "text"), sets it as the process-wide default and returns it.
 func Init(level, format string) *slog.Logger {
 	opts := &slog.HandlerOptions{Level: parseLevel(level)}
 

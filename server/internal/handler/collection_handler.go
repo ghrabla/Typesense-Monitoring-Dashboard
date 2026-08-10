@@ -19,7 +19,7 @@ func NewCollectionHandler(svc *service.CollectionService) *CollectionHandler {
 func (h *CollectionHandler) ListCollections(w http.ResponseWriter, r *http.Request) {
 	collections, err := h.svc.ListCollections(r.Context())
 	if err != nil {
-		writeServerError(w, r, http.StatusInternalServerError, "failed to retrieve collections", err)
+		writeUpstreamError(w, r, "failed to retrieve collections", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, collections)
@@ -34,7 +34,7 @@ func (h *CollectionHandler) GetCollection(w http.ResponseWriter, r *http.Request
 
 	collection, err := h.svc.GetCollection(r.Context(), name)
 	if err != nil {
-		writeServerError(w, r, http.StatusInternalServerError, "failed to retrieve collection", err)
+		writeUpstreamError(w, r, "failed to retrieve collection", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, collection)
@@ -59,10 +59,36 @@ func (h *CollectionHandler) CreateCollection(w http.ResponseWriter, r *http.Requ
 
 	collection, err := h.svc.CreateCollection(r.Context(), &req)
 	if err != nil {
-		writeServerError(w, r, http.StatusInternalServerError, "failed to create collection", err)
+		writeUpstreamError(w, r, "failed to create collection", err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, collection)
+}
+
+func (h *CollectionHandler) UpdateCollection(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	if name == "" {
+		writeError(w, http.StatusBadRequest, "collection name is required")
+		return
+	}
+
+	var req model.UpdateCollectionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+		return
+	}
+
+	if len(req.Fields) == 0 {
+		writeError(w, http.StatusBadRequest, "at least one field is required")
+		return
+	}
+
+	collection, err := h.svc.UpdateCollection(r.Context(), name, &req)
+	if err != nil {
+		writeUpstreamError(w, r, "failed to update collection", err)
+		return
+	}
+	writeJSON(w, http.StatusOK, collection)
 }
 
 func (h *CollectionHandler) DeleteCollection(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +99,7 @@ func (h *CollectionHandler) DeleteCollection(w http.ResponseWriter, r *http.Requ
 	}
 
 	if err := h.svc.DeleteCollection(r.Context(), name); err != nil {
-		writeServerError(w, r, http.StatusInternalServerError, "failed to delete collection", err)
+		writeUpstreamError(w, r, "failed to delete collection", err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{

@@ -3,9 +3,9 @@ import { Sidebar } from './Sidebar'
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="app-layout">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
-      <main className="app-layout__content">{children}</main>
+      <main className="flex-1 p-6">{children}</main>
     </div>
   )
 }

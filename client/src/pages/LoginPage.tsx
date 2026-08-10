@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Button, Card, Label, TextInput } from 'flowbite-react'
 import { useAuth } from '../context/AuthContext'
 import { ApiError } from '../api/client'
 
@@ -27,32 +28,42 @@ export function LoginPage() {
   }
 
   return (
-    <div className="login-page">
-      <form className="login-form" onSubmit={handleSubmit}>
-        <h1>Typesense Dashboard</h1>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          type="text"
-          value={username}
-          onChange={(event) => setUsername(event.target.value)}
-          autoComplete="username"
-          required
-        />
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          autoComplete="current-password"
-          required
-        />
-        {error && <p className="login-form__error">{error}</p>}
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Signing in…' : 'Sign in'}
-        </button>
-      </form>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+      <Card className="w-full max-w-sm">
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Typesense Dashboard</h1>
+          <div>
+            <div className="mb-2 block">
+              <Label htmlFor="username">Username</Label>
+            </div>
+            <TextInput
+              id="username"
+              type="text"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              autoComplete="username"
+              required
+            />
+          </div>
+          <div>
+            <div className="mb-2 block">
+              <Label htmlFor="password">Password</Label>
+            </div>
+            <TextInput
+              id="password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </div>
+          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Signing in…' : 'Sign in'}
+          </Button>
+        </form>
+      </Card>
     </div>
   )
 }

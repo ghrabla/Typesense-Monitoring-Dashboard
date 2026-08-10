@@ -1,3 +1,3 @@
 export function DashboardPage() {
-  return <div className="dashboard-page" />
+  return <div className="h-full" />
 }

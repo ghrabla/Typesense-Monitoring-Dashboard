@@ -1,20 +1,23 @@
 import { NavLink } from 'react-router-dom'
+import { Button, Sidebar as FlowbiteSidebar, SidebarItem, SidebarItemGroup, SidebarItems } from 'flowbite-react'
 import { useAuth } from '../context/AuthContext'
 
 export function Sidebar() {
   const { logout } = useAuth()
 
   return (
-    <aside className="sidebar">
-      <h1 className="sidebar__title">Typesense Dashboard</h1>
-      <nav className="sidebar__nav">
-        <NavLink to="/dashboard" className="sidebar__link">
-          Dashboard
-        </NavLink>
-      </nav>
-      <button type="button" className="sidebar__logout" onClick={() => void logout()}>
+    <FlowbiteSidebar aria-label="Main navigation" className="flex h-screen w-64 flex-col">
+      <div className="mb-4 px-2 text-lg font-semibold text-gray-900 dark:text-white">Typesense Dashboard</div>
+      <SidebarItems className="flex-1">
+        <SidebarItemGroup>
+          <SidebarItem as={NavLink} {...{ to: '/dashboard' }}>
+            Dashboard
+          </SidebarItem>
+        </SidebarItemGroup>
+      </SidebarItems>
+      <Button color="light" onClick={() => void logout()}>
         Logout
-      </button>
-    </aside>
+      </Button>
+    </FlowbiteSidebar>
   )
 }

@@ -1,3 +1,7 @@
+@import "tailwindcss";
+@import "flowbite-react/plugin/tailwindcss";
+@source "../.flowbite-react/class-list.json";
+
 :root {
   color-scheme: light dark;
   font-family: system-ui, -apple-system, sans-serif;
@@ -5,86 +9,4 @@
 
 body {
   margin: 0;
-}
-
-.login-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: 320px;
-  padding: 2rem;
-  border: 1px solid #3333;
-  border-radius: 8px;
-}
-
-.login-form h1 {
-  font-size: 1.25rem;
-  margin: 0 0 1rem;
-}
-
-.login-form input {
-  padding: 0.5rem;
-  font-size: 1rem;
-}
-
-.login-form button {
-  margin-top: 1rem;
-  padding: 0.6rem;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.login-form__error {
-  color: #d33;
-  font-size: 0.9rem;
-  margin: 0;
-}
-
-.app-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  width: 220px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem 1rem;
-  border-right: 1px solid #3333;
-}
-
-.sidebar__title {
-  font-size: 1.1rem;
-  margin: 0 0 2rem;
-}
-
-.sidebar__nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  flex: 1;
-}
-
-.sidebar__link {
-  text-decoration: none;
-  padding: 0.5rem;
-  border-radius: 6px;
-}
-
-.sidebar__logout {
-  padding: 0.6rem;
-  cursor: pointer;
-}
-
-.app-layout__content {
-  flex: 1;
-  padding: 1.5rem;
 }

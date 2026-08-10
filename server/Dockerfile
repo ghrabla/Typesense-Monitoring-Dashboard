@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine
+FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
@@ -7,8 +7,21 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o main ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o main ./cmd/api
+
+FROM alpine:3.19
+
+RUN apk add --no-cache ca-certificates curl && \
+	addgroup -S app && adduser -S app -G app
+
+WORKDIR /app
+COPY --from=builder /app/main .
+
+USER app
 
 EXPOSE 8080
 
-CMD ["./main"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+	CMD curl -f http://localhost:8080/api/health || exit 1
+
+ENTRYPOINT ["./main"]

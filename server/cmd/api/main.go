@@ -31,7 +31,10 @@ func main() {
 
 	tsClient := ts.NewClient(cfg)
 
+	authService := service.NewAuthService(cfg)
+
 	handlers := &router.Handlers{
+		Auth:       handler.NewAuthHandler(authService),
 		Health:     handler.NewHealthHandler(service.NewHealthService(tsClient)),
 		Collection: handler.NewCollectionHandler(service.NewCollectionService(tsClient)),
 		Document:   handler.NewDocumentHandler(service.NewDocumentService(tsClient)),
@@ -43,7 +46,7 @@ func main() {
 		Operation:  handler.NewOperationHandler(service.NewOperationService(tsClient)),
 	}
 
-	appRouter := router.New(handlers, cfg.ClientOrigin)
+	appRouter := router.New(handlers, cfg.ClientOrigin, authService)
 
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,

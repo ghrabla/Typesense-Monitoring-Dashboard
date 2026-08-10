@@ -18,6 +18,10 @@ type Config struct {
 	LogFormat         string
 	ShutdownTimeout   time.Duration
 	TypesenseTimeout  time.Duration
+	AdminUsername     string
+	AdminPassword     string
+	JWTSecret         string
+	TokenTTL          time.Duration
 }
 
 func Load() (*Config, error) {
@@ -32,6 +36,10 @@ func Load() (*Config, error) {
 		LogFormat:         getEnv("LOG_FORMAT", "json"),
 		ShutdownTimeout:   getEnvDuration("SHUTDOWN_TIMEOUT_SECONDS", 10*time.Second),
 		TypesenseTimeout:  getEnvDuration("TYPESENSE_TIMEOUT_SECONDS", 15*time.Second),
+		AdminUsername:     os.Getenv("ADMIN_USERNAME"),
+		AdminPassword:     os.Getenv("ADMIN_PASSWORD"),
+		JWTSecret:         os.Getenv("JWT_SECRET"),
+		TokenTTL:          getEnvDurationHours("TOKEN_TTL_HOURS", 24*time.Hour),
 	}
 
 	if cfg.TypesenseAPIKey == "" {
@@ -40,6 +48,14 @@ func Load() (*Config, error) {
 
 	if cfg.TypesenseProtocol != "http" && cfg.TypesenseProtocol != "https" {
 		return nil, fmt.Errorf("TYPESENSE_PROTOCOL must be 'http' or 'https', got %q", cfg.TypesenseProtocol)
+	}
+
+	if cfg.AdminUsername == "" || cfg.AdminPassword == "" {
+		return nil, fmt.Errorf("ADMIN_USERNAME and ADMIN_PASSWORD environment variables are required")
+	}
+
+	if cfg.JWTSecret == "" {
+		return nil, fmt.Errorf("JWT_SECRET environment variable is required")
 	}
 
 	return cfg, nil
@@ -54,6 +70,18 @@ func getEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func getEnvDurationHours(key string, fallback time.Duration) time.Duration {
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		return fallback
+	}
+	hours, err := strconv.Atoi(value)
+	if err != nil || hours <= 0 {
+		return fallback
+	}
+	return time.Duration(hours) * time.Hour
 }
 
 func getEnvDuration(key string, fallback time.Duration) time.Duration {

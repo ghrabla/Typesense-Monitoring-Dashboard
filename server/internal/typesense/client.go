@@ -40,6 +40,10 @@ func (c *Client) GetMetrics(ctx context.Context) (map[string]interface{}, error)
 	return c.getRawJSON(ctx, "/metrics.json")
 }
 
+func (c *Client) GetDebug(ctx context.Context) (map[string]interface{}, error) {
+	return c.getRawJSON(ctx, "/debug")
+}
+
 func (c *Client) getRawJSON(ctx context.Context, path string) (map[string]interface{}, error) {
 	url := c.baseURL + path
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)

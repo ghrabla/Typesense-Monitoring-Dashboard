@@ -31,3 +31,7 @@ func (s *HealthService) GetStats(ctx context.Context) (model.StatsResponse, erro
 func (s *HealthService) GetMetrics(ctx context.Context) (model.MetricsResponse, error) {
 	return s.client.GetMetrics(ctx)
 }
+
+func (s *HealthService) GetDebug(ctx context.Context) (map[string]interface{}, error) {
+	return s.client.GetDebug(ctx)
+}

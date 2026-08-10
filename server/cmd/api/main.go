@@ -1,9 +1,14 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/ghrabla/Typesense-Monitoring-Dashboard/internal/config"
 	"github.com/ghrabla/Typesense-Monitoring-Dashboard/internal/handler"
@@ -26,19 +31,50 @@ func main() {
 
 	tsClient := ts.NewClient(cfg)
 
-	healthSvc := service.NewHealthService(tsClient)
-	collectionSvc := service.NewCollectionService(tsClient)
+	handlers := &router.Handlers{
+		Health:     handler.NewHealthHandler(service.NewHealthService(tsClient)),
+		Collection: handler.NewCollectionHandler(service.NewCollectionService(tsClient)),
+		Document:   handler.NewDocumentHandler(service.NewDocumentService(tsClient)),
+		Key:        handler.NewKeyHandler(service.NewKeyService(tsClient)),
+		Alias:      handler.NewAliasHandler(service.NewAliasService(tsClient)),
+		Override:   handler.NewOverrideHandler(service.NewOverrideService(tsClient)),
+		Synonym:    handler.NewSynonymHandler(service.NewSynonymService(tsClient)),
+		Preset:     handler.NewPresetHandler(service.NewPresetService(tsClient)),
+		Operation:  handler.NewOperationHandler(service.NewOperationService(tsClient)),
+	}
 
-	healthHandler := handler.NewHealthHandler(healthSvc)
-	collectionHandler := handler.NewCollectionHandler(collectionSvc)
+	appRouter := router.New(handlers, cfg.ClientOrigin)
 
-	appRouter := router.New(healthHandler, collectionHandler, cfg.ClientOrigin)
+	srv := &http.Server{
+		Addr:         ":" + cfg.Port,
+		Handler:      appRouter,
+		ReadTimeout:  cfg.TypesenseTimeout,
+		WriteTimeout: cfg.TypesenseTimeout,
+		IdleTimeout:  60 * time.Second,
+	}
 
-	slog.Info("server starting", "port", cfg.Port)
-	slog.Info("typesense endpoint configured", "url", cfg.TypesenseURL())
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
-	if err := http.ListenAndServe(":"+cfg.Port, appRouter); err != nil {
-		slog.Error("server failed", "error", err)
+	go func() {
+		slog.Info("server starting", "port", cfg.Port)
+		slog.Info("typesense endpoint configured", "url", cfg.TypesenseURL())
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			slog.Error("server failed", "error", err)
+			os.Exit(1)
+		}
+	}()
+
+	<-ctx.Done()
+	stop()
+	slog.Info("shutting down server")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
+	defer cancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		slog.Error("graceful shutdown failed", "error", err)
 		os.Exit(1)
 	}
+	slog.Info("server stopped")
 }

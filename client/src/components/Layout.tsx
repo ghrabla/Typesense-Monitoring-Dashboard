@@ -3,9 +3,9 @@ import { Sidebar } from './Sidebar'
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top,_#eef1f8,_#f5f6fa)]">
       <Sidebar />
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   )
 }

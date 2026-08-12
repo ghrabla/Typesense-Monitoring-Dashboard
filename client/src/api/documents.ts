@@ -1,4 +1,4 @@
-import { apiFetch } from './client'
+import { apiFetch, apiFetchBlob } from './client'
 
 export type DocumentRecord = Record<string, unknown>
 
@@ -68,3 +68,33 @@ export function deleteDocument(collection: string, id: string) {
     { method: 'DELETE' },
   )
 }
+
+export interface ImportRequest {
+  documents: DocumentRecord[]
+  action?: 'create' | 'upsert' | 'update' | 'emplace'
+  batch_size?: number
+}
+
+export interface ImportResult {
+  success: boolean
+  error?: string
+  document?: string
+}
+
+export interface ImportSummary {
+  num_imported: number
+  num_failed: number
+  results: ImportResult[]
+}
+
+export function importDocuments(collection: string, payload: ImportRequest) {
+  return apiFetch<ImportSummary>(`/collections/${encodeURIComponent(collection)}/documents/import`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function exportDocuments(collection: string): Promise<Blob> {
+  return apiFetchBlob(`/collections/${encodeURIComponent(collection)}/documents/export`)
+}
+

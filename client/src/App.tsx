@@ -6,7 +6,12 @@ import { Layout } from './components/Layout'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { CollectionsPage } from './pages/CollectionsPage'
-import { CollectionDocumentsPage } from './pages/CollectionDocumentsPage'
+import { CollectionDetailPage } from './pages/CollectionDetailPage'
+import { AliasesPage } from './pages/AliasesPage'
+import { SynonymsPage } from './pages/SynonymsPage'
+import { OverridesPage } from './pages/OverridesPage'
+import { ApiKeysPage } from './pages/ApiKeysPage'
+import { ServerInfoPage } from './pages/ServerInfoPage'
 
 function App() {
   return (
@@ -46,7 +51,57 @@ function App() {
           element={
             <ProtectedRoute>
               <Layout>
-                <CollectionDocumentsPage />
+                <CollectionDetailPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/aliases"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <AliasesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/synonyms"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <SynonymsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/overrides"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <OverridesPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/api-keys"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ApiKeysPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/server"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <ServerInfoPage />
               </Layout>
             </ProtectedRoute>
           }

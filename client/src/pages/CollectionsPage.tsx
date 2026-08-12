@@ -1,25 +1,23 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Plus, Trash2, X } from 'lucide-react'
+import { Topbar } from '../components/Topbar'
+import { CollectionTable } from '../components/CollectionTable'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Checkbox } from '../components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import {
-  Alert,
-  Button,
-  Checkbox,
-  Label,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  Select,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeadCell,
-  TableRow,
-  TextInput,
-} from 'flowbite-react'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../components/ui/dialog'
+import { Spinner, ErrorBanner } from '../components/ui/feedback'
 import { createCollection, deleteCollection, listCollections } from '../api/collections'
 import type { CollectionField, CollectionSummary } from '../api/collections'
 import { ApiError } from '../api/client'
@@ -159,165 +157,155 @@ export function CollectionsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Collections</h1>
-        <Button onClick={openCreateModal}>Create collection</Button>
+    <div className="flex flex-col">
+      <Topbar
+        title="Collections"
+        description="Manage your Typesense collections and schemas"
+        actions={
+          <Button onClick={openCreateModal}>
+            <Plus className="h-4 w-4" />
+            Create collection
+          </Button>
+        }
+      />
+
+      <div className="flex flex-col gap-4 p-8">
+        {error && <ErrorBanner>{error}</ErrorBanner>}
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-24">
+            <Spinner className="h-6 w-6" />
+          </div>
+        ) : (
+          <CollectionTable
+            collections={collections}
+            onOpen={(name) => navigate(`/collections/${encodeURIComponent(name)}`)}
+            onDelete={(name) => setDeleteTarget(name)}
+          />
+        )}
       </div>
 
-      {error && <Alert color="failure">{error}</Alert>}
-
-      {isLoading ? (
-        <Spinner />
-      ) : (
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableHeadCell>Name</TableHeadCell>
-              <TableHeadCell>Documents</TableHeadCell>
-              <TableHeadCell>Fields</TableHeadCell>
-              <TableHeadCell>
-                <span className="sr-only">Actions</span>
-              </TableHeadCell>
-            </TableRow>
-          </TableHead>
-          <TableBody className="divide-y">
-            {collections.map((collection) => (
-              <TableRow key={collection.name} className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                <TableCell className="font-medium text-gray-900 dark:text-white">{collection.name}</TableCell>
-                <TableCell>{collection.num_documents}</TableCell>
-                <TableCell>{collection.num_fields}</TableCell>
-                <TableCell className="flex gap-2">
-                  <Button size="xs" onClick={() => navigate(`/collections/${encodeURIComponent(collection.name)}`)}>
-                    Browse
-                  </Button>
-                  <Button size="xs" color="red" onClick={() => setDeleteTarget(collection.name)}>
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-            {collections.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center text-gray-500 dark:text-gray-400">
-                  No collections yet.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      )}
-
-      <Modal show={showCreateModal} onClose={() => setShowCreateModal(false)}>
-        <ModalHeader>Create collection</ModalHeader>
-        <form onSubmit={handleCreate}>
-          <ModalBody>
-            <div className="flex flex-col gap-4">
-              <div>
-                <div className="mb-2 block">
-                  <Label htmlFor="collection-name">Name</Label>
-                </div>
-                <TextInput id="collection-name" value={name} onChange={(e) => setName(e.target.value)} required />
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create collection</DialogTitle>
+            <DialogDescription>Define a name, schema fields, and optional default sort field.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreate} className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="collection-name">Name</Label>
+                <Input id="collection-name" value={name} onChange={(e) => setName(e.target.value)} required />
               </div>
-              <div>
-                <div className="mb-2 block">
-                  <Label htmlFor="default-sorting-field">Default sorting field (optional)</Label>
-                </div>
-                <TextInput
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="default-sorting-field">Default sorting field (optional)</Label>
+                <Input
                   id="default-sorting-field"
                   value={defaultSortingField}
                   onChange={(e) => setDefaultSortingField(e.target.value)}
                 />
               </div>
+            </div>
 
-              <div className="flex flex-col gap-3">
-                <Label>Fields</Label>
+            <div className="flex flex-col gap-3">
+              <Label>Fields</Label>
+              <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
                 {fields.map((field, index) => (
                   <div
                     key={index}
-                    className="flex flex-wrap items-end gap-2 rounded-lg border border-gray-200 p-3 dark:border-gray-700"
+                    className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/60 p-3"
                   >
-                    <TextInput
+                    <Input
                       placeholder="Field name"
                       value={field.name}
                       onChange={(e) => updateField(index, { name: e.target.value })}
-                      className="w-40"
+                      className="w-36"
                     />
-                    <Select
-                      value={field.type}
-                      onChange={(e) => updateField(index, { type: e.target.value })}
-                      className="w-32"
-                    >
-                      {FIELD_TYPES.map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
+                    <Select value={field.type} onValueChange={(value) => updateField(index, { type: value })}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FIELD_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
-                    <label className="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
+                    <label className="flex items-center gap-1.5 text-xs text-slate-600">
                       <Checkbox
                         checked={field.facet}
-                        onChange={(e) => updateField(index, { facet: e.target.checked })}
+                        onCheckedChange={(checked) => updateField(index, { facet: checked === true })}
                       />
                       Facet
                     </label>
-                    <label className="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
+                    <label className="flex items-center gap-1.5 text-xs text-slate-600">
                       <Checkbox
                         checked={field.optional}
-                        onChange={(e) => updateField(index, { optional: e.target.checked })}
+                        onCheckedChange={(checked) => updateField(index, { optional: checked === true })}
                       />
                       Optional
                     </label>
-                    <label className="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
-                      <Checkbox checked={field.sort} onChange={(e) => updateField(index, { sort: e.target.checked })} />
+                    <label className="flex items-center gap-1.5 text-xs text-slate-600">
+                      <Checkbox
+                        checked={field.sort}
+                        onCheckedChange={(checked) => updateField(index, { sort: checked === true })}
+                      />
                       Sort
                     </label>
                     <Button
-                      size="xs"
-                      color="light"
+                      variant="ghost"
+                      size="icon"
                       type="button"
                       onClick={() => removeField(index)}
                       disabled={fields.length === 1}
+                      className="ml-auto text-slate-400 hover:text-rose-600"
                     >
-                      Remove
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
-                <Button size="xs" color="light" type="button" onClick={addField}>
-                  Add field
-                </Button>
               </div>
-
-              {formError && <Alert color="failure">{formError}</Alert>}
+              <Button variant="outline" size="sm" type="button" onClick={addField} className="self-start">
+                <Plus className="h-3.5 w-3.5" />
+                Add field
+              </Button>
             </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating…' : 'Create'}
-            </Button>
-            <Button color="light" type="button" onClick={() => setShowCreateModal(false)}>
+
+            {formError && <ErrorBanner>{formError}</ErrorBanner>}
+
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => setShowCreateModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Creating…' : 'Create'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete collection</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{deleteTarget}</strong>? This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
               Cancel
             </Button>
-          </ModalFooter>
-        </form>
-      </Modal>
-
-      <Modal show={deleteTarget !== null} onClose={() => setDeleteTarget(null)} size="md">
-        <ModalHeader>Delete collection</ModalHeader>
-        <ModalBody>
-          <p className="text-gray-700 dark:text-gray-300">
-            Are you sure you want to delete <strong>{deleteTarget}</strong>? This cannot be undone.
-          </p>
-        </ModalBody>
-        <ModalFooter>
-          <Button color="red" onClick={() => void handleDelete()} disabled={isDeleting}>
-            {isDeleting ? 'Deleting…' : 'Delete'}
-          </Button>
-          <Button color="light" onClick={() => setDeleteTarget(null)}>
-            Cancel
-          </Button>
-        </ModalFooter>
-      </Modal>
+            <Button variant="destructive" onClick={() => void handleDelete()} disabled={isDeleting}>
+              <Trash2 className="h-4 w-4" />
+              {isDeleting ? 'Deleting…' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

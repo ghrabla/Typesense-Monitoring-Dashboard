@@ -47,3 +47,28 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
   return response.json() as Promise<T>
 }
+
+/**
+ * For endpoints that stream a non-JSON body (e.g. NDJSON export) and require
+ * the Authorization header, which rules out a plain <a href> download link.
+ */
+export async function apiFetchBlob(path: string, options: RequestInit = {}): Promise<Blob> {
+  const token = getToken()
+  const headers = new Headers(options.headers)
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, { ...options, headers })
+
+  if (response.status === 401) {
+    clearToken()
+  }
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => '')
+    throw new ApiError(response.status, body || 'Request failed')
+  }
+
+  return response.blob()
+}

@@ -5,6 +5,8 @@ import { GuestRoute } from './components/GuestRoute'
 import { Layout } from './components/Layout'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { CollectionsPage } from './pages/CollectionsPage'
+import { CollectionDocumentsPage } from './pages/CollectionDocumentsPage'
 
 function App() {
   return (
@@ -25,6 +27,26 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <DashboardPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/collections"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CollectionsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/collections/:name"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CollectionDocumentsPage />
               </Layout>
             </ProtectedRoute>
           }
